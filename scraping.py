@@ -14,6 +14,8 @@ def scrape_all():
     browser = Browser('chrome', **executable_path, headless=False)
 
     news_title, news_paragraph, = mars_news(browser)
+    #imgage_url, image_title = mars_images(browser)
+    hemisphere_image_urls = mars_images(browser)
 
     # Run all scraping functions and store results in a dictionary
     data = {
@@ -21,6 +23,9 @@ def scrape_all():
         "news_paragraph": news_paragraph,
         "featured_image": featured_image(browser),
         "facts": mars_facts(),
+        # "img_url": imgage_url,
+        # "img_title": image_title,
+        "hemisphere": hemisphere_image_urls,
         "last_modified": dt.datetime.now()
     }
 
@@ -85,7 +90,6 @@ def featured_image(browser):
 
     # Use the base url to create an absolute url
     img_url = f'https://spaceimages-mars.com/{img_url_rel}'
-
     return img_url
 
 
@@ -106,6 +110,46 @@ def mars_facts():
 
     # Convert DataFrame back into HTML-ready code, add bootstrap
     return df.to_html(classes="table table_striped")
+
+
+def mars_images(browser):
+    # Visit URL
+    url = 'https://astrogeology.usgs.gov/search/results?q=hemisphere+enhanced&k1=target&v1=Mars'
+    browser.visit(url)
+
+    # Create a list to hold the images and titles.
+    hemisphere_image_urls = []
+
+    for i in range(4):
+        # create empty dictionary
+        hemispheres = {}
+
+        # Parse the resulting html with soup
+        html = browser.html
+        img_soup = soup(html, 'html.parser')
+
+        # Click on each hemisphere link
+        browser.find_by_css('a.product-item h3')[i].click()
+
+        # Navigate to the full-resolution image page
+        element = browser.links.find_by_text('Sample').first
+
+        # Retrieve the full-resolution image URL string and title for the hemisphere image
+        img_url = element['href']
+        img_title = browser.find_by_css("h2.title").text
+
+        # Save the full-resolution image URL string
+        hemispheres["img_url"] = img_url
+        # Save the hemisphere image title
+        hemispheres["img_title"] = img_title
+
+        # Add img_url and title to hemispheres dictionary
+        hemisphere_image_urls.append(hemispheres)
+
+        # Navigate back to the beginning to get the next hemisphere image
+        browser.back()
+
+        return img_url, img_title
 
 
 if __name__ == "__main__":
