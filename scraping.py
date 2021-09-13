@@ -14,8 +14,8 @@ def scrape_all():
     browser = Browser('chrome', **executable_path, headless=False)
 
     news_title, news_paragraph, = mars_news(browser)
-    #imgage_url, image_title = mars_images(browser)
-    hemisphere_image_urls = mars_images(browser)
+
+    #hemisphere_image_urls = mars_images(browser)
 
     # Run all scraping functions and store results in a dictionary
     data = {
@@ -25,8 +25,8 @@ def scrape_all():
         "facts": mars_facts(),
         # "img_url": imgage_url,
         # "img_title": image_title,
-        "hemisphere": hemisphere_image_urls,
-        "last_modified": dt.datetime.now()
+        "hemispheres": mars_images(browser),
+        "last_modified": dt.datetime.now(),
     }
 
     # Stop webdriver and return data
@@ -111,6 +111,8 @@ def mars_facts():
     # Convert DataFrame back into HTML-ready code, add bootstrap
     return df.to_html(classes="table table_striped")
 
+    print("You guys rock!!!")
+
 
 def mars_images(browser):
     # Visit URL
@@ -119,6 +121,8 @@ def mars_images(browser):
 
     # Create a list to hold the images and titles.
     hemisphere_image_urls = []
+
+    #items = img_soup.find_all("div", class_="item")
 
     for i in range(4):
         # create empty dictionary
@@ -149,7 +153,10 @@ def mars_images(browser):
         # Navigate back to the beginning to get the next hemisphere image
         browser.back()
 
-        return img_url, img_title
+    # print(hemisphere_image_urls)
+
+    # return img_url, img_title
+    return hemisphere_image_urls
 
 
 if __name__ == "__main__":
